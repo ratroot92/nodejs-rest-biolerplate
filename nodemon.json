@@ -1,12 +1,9 @@
 {
-  "watch": ["src"],
-  "ext": "ts,js,json",
-  "ignore": ["node_modules", "coverage", "dist"],
-  "exec": "ts-node -r tsconfig-paths/register ./src/server.ts",
-  "restartable": "rs",
-  "env": {
-    "NODE_ENV": "development",
-    "PORT": 3000,
-    "HOST": "0.0.0.0"
-  }
+    "delay": "0",
+    "execMap": {
+        "ts": "node -r ts-node/register"
+    },
+    "events": {
+        "start": "tslint -c ./tslint.json -t stylish 'src/**/*.ts'"
+    }
 }

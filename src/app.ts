@@ -1,50 +1,47 @@
-import express, { NextFunction, Request, Response, Application } from 'express';
-import path from 'path';
-import favicon from 'serve-favicon';
-import methodOverride from 'method-override';
-import logging from './helpers/logging';
-import usersController from '@src/controller/usersController';
+import 'reflect-metadata';
 
-const NAMESPACE = 'Server';
-const app: Application = express();
-/** # BEFORE CORS START  #* */
-app.use((req: Request, res: Response, next: NextFunction) => {
-  logging.info(NAMESPACE, `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}]`);
-  // res.on('finish', () => {
-  //   logging.error(
-  //     NAMESPACE,
-  //     `METHOD - [${req.method}], URL - [${req.url}], IP - [${req.socket.remoteAddress}], STATUS - [${req.statusCode}]`
-  //   );
-  // });
-  next();
-});
-/** # BEFORE CORS END   #* */
-app.use(favicon(path.join(__dirname, '/public/favicon.ico')));
-app.use(methodOverride());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+import { bootstrapMicroframework } from 'microframework-w3tec';
 
-// error handling middleware should be loaded after the loading the routes
-if (app.get('env') === 'development') {
-  // app.use(errorHandler());
-}
-app.use('/', (req: Request, res: Response) => {
-  res.send();
-});
+import { banner } from './lib/banner';
+import { Logger } from './lib/logger';
+import { eventDispatchLoader } from './loaders/eventDispatchLoader';
+import { expressLoader } from './loaders/expressLoader';
+import { graphqlLoader } from './loaders/graphqlLoader';
+import { homeLoader } from './loaders/homeLoader';
+import { iocLoader } from './loaders/iocLoader';
+import { monitorLoader } from './loaders/monitorLoader';
+import { publicLoader } from './loaders/publicLoader';
+import { swaggerLoader } from './loaders/swaggerLoader';
+import { typeormLoader } from './loaders/typeormLoader';
+import { winstonLoader } from './loaders/winstonLoader';
 
-app.all('/users', usersController);
+/**
+ * EXPRESS TYPESCRIPT BOILERPLATE
+ * ----------------------------------------
+ *
+ * This is a boilerplate for Node.js Application written in TypeScript.
+ * The basic layer of this app is express. For further information visit
+ * the 'README.md' file.
+ */
+const log = new Logger(__filename);
 
-process
-  .on('unhandledRejection', (reason, p) => {
-    console.error(reason, 'Unhandled Rejection at Promise', p);
-  })
-  .on('uncaughtException', err => {
-    console.error(err, 'Uncaught Exception thrown');
-    process.exit(1);
-  });
-app.listen(process.env.PORT, () => {
-  console.log(`Express listening at ${process.env.HOST}:${process.env.PORT}`);
-});
-
-export default app;
+bootstrapMicroframework({
+    /**
+     * Loader is a place where you can configure all your modules during microframework
+     * bootstrap process. All loaders are executed one by one in a sequential order.
+     */
+    loaders: [
+        winstonLoader,
+        iocLoader,
+        eventDispatchLoader,
+        typeormLoader,
+        expressLoader,
+        swaggerLoader,
+        monitorLoader,
+        homeLoader,
+        publicLoader,
+        graphqlLoader,
+    ],
+})
+    .then(() => banner(log))
+    .catch(error => log.error('Application is crashed: ' + error));
