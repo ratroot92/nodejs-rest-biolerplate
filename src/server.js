@@ -1,6 +1,9 @@
 require('./config/env-config');
 const app = require(`./app`);
 
+//
+require(`./brokers/rabbit-mq-amqplib/index`);
+
 app.listen(process.env.PORT, process.env.HOST, (err) => {
   if (!err) {
     console.log(
